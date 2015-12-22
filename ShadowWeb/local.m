@@ -558,6 +558,7 @@ void set_config(const char *server, const char *remote_port, const char* passwor
     NSLog(@"calculating ciphers");
 #endif
     // TODO move to encrypt.m
+    // 去配置一些加密的参数
     config_encryption(password, method);
 }
 

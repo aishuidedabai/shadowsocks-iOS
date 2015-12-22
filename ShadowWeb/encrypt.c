@@ -203,6 +203,7 @@ void cleanup_encryption(struct encryption_ctx *ctx) {
 void config_encryption(const char *password, const char *method) {
     SSLeay_add_all_algorithms();
     sodium_init();
+    //将各种加密方法转换成为int型
     _method = encryption_method_from_string(method);
     if (_method == ENCRYPTION_TABLE) {
         get_table((unsigned char *) password);

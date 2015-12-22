@@ -48,7 +48,7 @@ void polipo_exit();
     polipoEnabled = YES;
     //新建一个队列
     dispatch_queue_t proxy = dispatch_queue_create("proxy", NULL);
-    //将[self runProxy]
+    //将[self runProxy]放倒队列中执行掉
     dispatch_async(proxy, ^{
         [self runProxy];
     });

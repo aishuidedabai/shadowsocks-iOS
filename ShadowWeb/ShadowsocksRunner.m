@@ -22,6 +22,7 @@
 }
 
 + (BOOL)runProxy {
+    //看是否设置了自定义的服务器
     if (![ShadowsocksRunner settingsAreNotComplete]) {
         local_main();
         return YES;
@@ -34,16 +35,27 @@
 }
 
 + (void)reloadConfig {
+    //看是否配置了服务器信息
     if (![ShadowsocksRunner settingsAreNotComplete]) {
+        //看是否使用了公共服务器
         if ([ShadowsocksRunner isUsingPublicServer]) {
+            //使用了公共服务器
+            //去local.m中设置服务器IP，端口，密码，加密方式
             set_config("106.186.124.182", "8911", "Shadowsocks", "aes-128-cfb");
+            //void *memcpy(void*dest, const void *src, size_t n);
             memcpy(shadowsocks_key, "\x45\xd1\xd9\x9e\xbd\xf5\x8c\x85\x34\x55\xdd\x65\x46\xcd\x06\xd3", 16);
         } else {
+            //如果没有使用公共服务器
+            //取出加密方式
             NSString *v = [[NSUserDefaults standardUserDefaults] objectForKey:kShadowsocksEncryptionKey];
             if (!v) {
                 v = @"aes-256-cfb";
             }
-            set_config([[[NSUserDefaults standardUserDefaults] stringForKey:kShadowsocksIPKey] cStringUsingEncoding:NSUTF8StringEncoding], [[[NSUserDefaults standardUserDefaults] stringForKey:kShadowsocksPortKey] cStringUsingEncoding:NSUTF8StringEncoding], [[[NSUserDefaults standardUserDefaults] stringForKey:kShadowsocksPasswordKey] cStringUsingEncoding:NSUTF8StringEncoding], [v cStringUsingEncoding:NSUTF8StringEncoding]);
+            //去local.m中设置服务器IP，端口，密码，加密方式
+            NSString *sockIP = [[NSUserDefaults standardUserDefaults] stringForKey:kShadowsocksIPKey];
+            NSString *sockPort = [[NSUserDefaults standardUserDefaults] stringForKey:kShadowsocksPortKey];
+            NSString *sockPassword = [[NSUserDefaults standardUserDefaults] stringForKey:kShadowsocksPasswordKey];
+            set_config([sockIP cStringUsingEncoding:NSUTF8StringEncoding], [sockPort cStringUsingEncoding:NSUTF8StringEncoding], [sockPassword cStringUsingEncoding:NSUTF8StringEncoding], [v cStringUsingEncoding:NSUTF8StringEncoding]);
         }
     }
 }
