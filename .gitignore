@@ -1,5 +1,6 @@
 build
 .DS_Store
+shadowsocks.xcworkspace/xcuserdata/user.xcuserdatad/UserInterfaceState.xcuserstate
 Pods/Pods.xcodeproj/xcuserdata/user.xcuserdatad/
 shadowsocks.xcworkspace/xcshareddata/shadowsocks.xcscmblueprint
 shadowsocks.xcworkspace/xcuserdata/user.xcuserdatad/
@@ -20,6 +21,7 @@ shadowsocks.xcodeproj/xcuserdata/
 *.xcworkspace
 !default.xcworkspace
 xcuserdata
+*.xcuserstate
 profile
 *.moved-aside
 DerivedData
