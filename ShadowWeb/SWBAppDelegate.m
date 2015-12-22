@@ -50,16 +50,24 @@ void polipo_exit();
     dispatch_queue_t proxy = dispatch_queue_create("proxy", NULL);
     //将[self runProxy]放倒队列中执行掉
     dispatch_async(proxy, ^{
+        //这个方法是一个死循环，不会退出。
+        //估计这里会去调local.m的函数，实现流量代理了
         [self runProxy];
     });
 
 //    [self proxyHttpStart];
 //    [NSTimer scheduledTimerWithTimeInterval:0.5 target:self selector:@selector(updatePolipo) userInfo:nil repeats:YES];
-
+    
+    //在iOS上搭一个轻量级的服务器 see https://github.com/swisspol/GCDWebServer
     NSData *pacData = [[NSData dataWithContentsOfURL:[[NSBundle mainBundle] URLForResource:@"proxy" withExtension:@"pac.gz"]] gunzippedData];
     GCDWebServer *webServer = [[GCDWebServer alloc] init];
+    
+    //⚠️Even though most clients will process the script regardless of the MIME type returned in the HTTP reply, for the sake of completeness and to maximize compatibility, the HTTP server should be configured to declare the MIME type of this file to be either application/x-ns-proxy-autoconfig or application/x-javascript-config.
+    //这里请求pac文件返回固定的文件内容即可
+    //这个pac文件规定了代理的服务器
     [webServer addHandlerForMethod:@"GET" path:@"/proxy.pac" requestClass:[GCDWebServerRequest class] processBlock:^GCDWebServerResponse *(GCDWebServerRequest *request) {
-             return [GCDWebServerDataResponse responseWithData:pacData contentType:@"application/x-ns-proxy-autoconfig"];
+        GCDWebServerDataResponse *res = [GCDWebServerDataResponse responseWithData:pacData contentType:@"application/x-ns-proxy-autoconfig"];
+        return res;
 
          }
     ];
@@ -142,6 +150,7 @@ void polipo_exit();
 #pragma mark - Run proxy
 
 - (void)runProxy {
+    //去配置ip 端口等信息，配置到了local.m里
     [ShadowsocksRunner reloadConfig];
     for (; ;) {
         if ([ShadowsocksRunner runProxy]) {

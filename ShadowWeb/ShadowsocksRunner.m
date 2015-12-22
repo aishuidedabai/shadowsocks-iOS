@@ -24,6 +24,8 @@
 + (BOOL)runProxy {
     //看是否设置了自定义的服务器
     if (![ShadowsocksRunner settingsAreNotComplete]) {
+        //设置了，执行local.m中的主函数。
+        //这里估计就是去监听端口，实现流量代理了
         local_main();
         return YES;
     } else {
