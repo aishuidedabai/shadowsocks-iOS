@@ -96,7 +96,7 @@ int create_and_bind(const char *port) {
 
     return listen_sock;
 }
-
+//接到数据的回调
 static void server_recv_cb (EV_P_ ev_io *w, int revents) {
 	struct server_ctx *server_recv_ctx = (struct server_ctx *)w;
 	struct server *server = server_recv_ctx->server;
@@ -277,7 +277,7 @@ static void server_recv_cb (EV_P_ ev_io *w, int revents) {
         server->stage = 5;
 	}
 }
-
+//发出数据的回调
 static void server_send_cb (EV_P_ ev_io *w, int revents) {
 	struct server_ctx *server_send_ctx = (struct server_ctx *)w;
 	struct server *server = server_send_ctx->server;
@@ -526,11 +526,15 @@ void close_and_free_server(EV_P_ struct server *server) {
 		free_server(server);
 	}
 }
+
+
 static void accept_cb (EV_P_ ev_io *w, int revents)
 {
+    
 	struct listen_ctx *listener = (struct listen_ctx *)w;
 	int serverfd;
 	while (1) {
+        //accept监听的套接字
 		serverfd = accept(listener->fd, NULL, NULL);
 		if (serverfd == -1) {
             if (errno != EAGAIN && errno != EWOULDBLOCK) {
@@ -538,16 +542,46 @@ static void accept_cb (EV_P_ ev_io *w, int revents)
             }
 			break;
 		}
+        //将accepted socket设置为非阻塞式的
 		setnonblocking(serverfd);
         int opt = 1;
         setsockopt(serverfd, IPPROTO_TCP, TCP_NODELAY, &opt, sizeof(opt));
         setsockopt(serverfd, SOL_SOCKET, SO_NOSIGPIPE, &opt, sizeof(opt));
+        //remote结构体和service结构体的比较:
+        
+        /*
+         struct server {
+         int fd;
+         char buf[BUF_SIZE + EVP_MAX_IV_LENGTH + EVP_MAX_BLOCK_LENGTH]; // server send from, remote recv into
+         char stage;
+         size_t buf_len;
+         struct server_ctx *recv_ctx;
+         struct server_ctx *send_ctx;
+         struct remote *remote;
+         };
+         */
+        
+        /*
+         struct remote {
+         int fd;
+         char buf[BUF_SIZE + EVP_MAX_IV_LENGTH + EVP_MAX_BLOCK_LENGTH]; // remote send from, server recv into
+         size_t buf_len;
+         struct remote_ctx *recv_ctx;
+         struct remote_ctx *send_ctx;
+         struct server *server;
+         struct encryption_ctx recv_encryption_ctx;
+         struct encryption_ctx send_encryption_ctx;
+         };
+         */
+        
+        //这里设置了serverfd为非阻塞式的。并在里面设置了socket有读写资源的时候触发相应的回调。
 		struct server *server = new_server(serverfd);
 		struct addrinfo hints, *res;
 		int sockfd;
 		memset(&hints, 0, sizeof hints);
 		hints.ai_family = AF_UNSPEC;
 		hints.ai_socktype = SOCK_STREAM;
+        //拿到代理服务器的信息
 		int r = getaddrinfo(_server, _remote_port, &hints, &res);
         if (r) {
             fprintf(stderr, "getaddrinfo: %s", gai_strerror(r));
@@ -563,10 +597,13 @@ static void accept_cb (EV_P_ ev_io *w, int revents)
 			free_server(server);
 			continue;
 		}
+        //将socket设置为非阻塞式的。并在里面设置了socket有读写资源的时候触发相应的回调。
 		setnonblocking(sockfd);
-		struct remote *remote = new_remote(sockfd);
+        struct remote *remote = new_remote(sockfd);
+        //将两个结构体关联起来
 		server->remote = remote;
 		remote->server = server;
+        //连接代理服务器
 		connect(sockfd, res->ai_addr, res->ai_addrlen);
 		freeaddrinfo(res);
 		// listen to remote connected event
@@ -617,6 +654,7 @@ int local_main ()
     struct listen_ctx listen_ctx;
     listen_ctx.fd = listenfd;
     struct ev_loop *loop = EV_DEFAULT;
+    //这个地方是在socket在客户端有可读写的数据的时候会调用，见http://www.nljb.net/default/libev-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/
     ev_io_init (&listen_ctx.io, accept_cb, listenfd, EV_READ);
     ev_io_start (loop, &listen_ctx.io);
     ev_run (loop, 0);
