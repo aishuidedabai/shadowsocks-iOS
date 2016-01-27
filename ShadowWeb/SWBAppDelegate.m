@@ -40,7 +40,7 @@ void polipo_exit();
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     [self updateProxyMode];
 
-    [Crashlytics startWithAPIKey:@"fa65e4ab45ef1c9c69682529bee0751cd22d5d80"];
+//    [Crashlytics startWithAPIKey:@"fa65e4ab45ef1c9c69682529bee0751cd22d5d80"];
 
     [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^{
 
@@ -48,7 +48,7 @@ void polipo_exit();
     polipoEnabled = YES;
     //新建一个队列
     dispatch_queue_t proxy = dispatch_queue_create("proxy", NULL);
-    //将[self runProxy]放倒队列中执行掉
+    //将[self runProxy]放到队列中执行掉
     dispatch_async(proxy, ^{
         //这个方法是一个死循环，不会退出。
         //估计这里会去调local.m的函数，实现流量代理了

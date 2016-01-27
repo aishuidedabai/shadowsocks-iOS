@@ -306,6 +306,7 @@ void onPACChange(
 }
 
 - (void)runProxy {
+    //进去设置代理服务器以及
     [ShadowsocksRunner reloadConfig];
     for (; ;) {
         if ([ShadowsocksRunner runProxy]) {

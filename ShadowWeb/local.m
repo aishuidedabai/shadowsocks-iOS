@@ -17,6 +17,7 @@ char _password[SAVED_STR_LEN];
 
 int setnonblocking(int fd) {
     int flags;
+    //fcntl将socket设置为非阻塞，会导致read socket的时候返回EAGAIN 或 EWOULDBLOCK错误,你可以poll轮询，但这样很耗费cpu，比较优雅的处理方式是select()函数。select()函数能够同时监视若干socket，它能够告诉你哪一个可以读，哪一个可以写，哪一个抛出异常了。socket()依旧是比较慢，替代方法是采用libevent。
     if (-1 ==(flags = fcntl(fd, F_GETFL, 0)))
         flags = 0;
     return fcntl(fd, F_SETFL, flags | O_NONBLOCK);
@@ -40,8 +41,37 @@ int create_and_bind(const char *port) {
     for (rp = result; rp != NULL; rp = rp->ai_next) {
         listen_sock = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
         int opt = 1;
+        //int	setsockopt(int, int, int, const void *, socklen_t);
+        /*
+         SO_DEBUG        允许纪录调试信息 enables recording of debugging information
+         SO_REUSEADDR    允许本地地址重用 enables local address reuse 允许其他socket绑定这个端口，除非已经有一个活跃监听在这个端口上，这个选项可以使你重启服务的时候避免出现“address is already in use”
+         SO_REUSEPORT    允许重复绑定 enables duplicate address and port bindings
+         SO_KEEPALIVE    允许keepalive enables keep connections alive
+         SO_DONTROUTE     enables routing bypass for outgoing messages
+         SO_LINGER       linger on close if data present
+         SO_BROADCAST    enables permission to transmit broadcast messages
+         SO_OOBINLINE    enables reception of out-of-band data in band
+         SO_SNDBUF       set buffer size for output
+         SO_RCVBUF       set buffer size for input
+         SO_SNDLOWAT     set minimum count for output
+         SO_RCVLOWAT     set minimum count for input
+         SO_SNDTIMEO     set timeout value for output
+         SO_RCVTIMEO     set timeout value for input
+         SO_TYPE         get the type of the socket (get only)
+         SO_ERROR        get and clear error on the socket (get only)
+         SO_NOSIGPIPE    do not generate SIGPIPE, instead return EPIPE
+         SO_NREAD        number of bytes to be read (get only)
+         SO_NWRITE       number of bytes written not yet sent by the
+         protocol (get only)
+         SO_LINGER_SEC   linger on close if data present with timeout in
+         seconds
+         */
+        //int	setsockopt(socket的标识符, int, socket的选项, 一个指向int的指针, int的长度);
+        //允许其他socket绑定这个端口，除非已经有一个活跃监听在这个端口上，这个选项可以使你重启服务的时候避免出现“address is already in use”
         setsockopt(listen_sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+        //在套接字上禁用Nagle算法，使数据即时发送
         setsockopt(listen_sock, IPPROTO_TCP, TCP_NODELAY, &opt, sizeof(opt));
+        //忽略网络出错导致的异常抛出
         setsockopt(listen_sock, SOL_SOCKET, SO_NOSIGPIPE, &opt, sizeof(opt));
         if (listen_sock == -1)
             continue;
@@ -565,6 +595,7 @@ void set_config(const char *server, const char *remote_port, const char* passwor
 int local_main ()
 {
     int listenfd;
+    //创建套接字并绑定
     listenfd = create_and_bind("1080");
     if (listenfd < 0) {
 #ifdef DEBUG
@@ -572,6 +603,7 @@ int local_main ()
 #endif
         return 1;
     }
+    //监听套接字
     if (listen(listenfd, SOMAXCONN) == -1) {
         NSLog(@"listen() error.");
         return 1;
@@ -579,8 +611,9 @@ int local_main ()
 #ifdef DEBUG
     NSLog(@"server listening at port %s\n", "1080");
 #endif
-
+    //将监听的socket设为nonblock
     setnonblocking(listenfd);
+    //下面就看不懂了，但是估计就是用libevent实现了select()函数的作用。
     struct listen_ctx listen_ctx;
     listen_ctx.fd = listenfd;
     struct ev_loop *loop = EV_DEFAULT;
