@@ -140,6 +140,7 @@ static void server_recv_cb (EV_P_ ev_io *w, int revents) {
 
     // local socks5 server
     if (server->stage == 5) {
+        //加密数据
         encrypt_buf(&(remote->send_encryption_ctx), (unsigned char *)remote->buf, (size_t *)&r);
         ssize_t w = send(remote->fd, remote->buf, (size_t)r, 0);
         if(w == -1) {
@@ -633,7 +634,9 @@ int local_main ()
 {
     int listenfd;
     //创建套接字并绑定
-    listenfd = create_and_bind("1080");
+//    listenfd = create_and_bind("1080");
+    
+    listenfd = create_and_bind("10024");
     if (listenfd < 0) {
 #ifdef DEBUG
         NSLog(@"bind() error..");
@@ -646,7 +649,8 @@ int local_main ()
         return 1;
     }
 #ifdef DEBUG
-    NSLog(@"server listening at port %s\n", "1080");
+//    NSLog(@"server listening at port %s\n", "1080");
+    NSLog(@"server listening at port %s\n", "10024");
 #endif
     //将监听的socket设为nonblock
     setnonblocking(listenfd);

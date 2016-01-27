@@ -89,7 +89,7 @@ void cipher_update(struct encryption_ctx *ctx, unsigned char *out, size_t *outle
         ctx->bytes_remaining = padding % SODIUM_BLOCK_SIZE;
     }
 }
-
+#pragma mark - 这里对数据缓冲加密
 void encrypt_buf(struct encryption_ctx *ctx, unsigned char *buf, size_t *len) {
     if (ctx->cipher == CIPHER_TABLE) {
         table_encrypt(buf, *len);
@@ -116,7 +116,7 @@ void encrypt_buf(struct encryption_ctx *ctx, unsigned char *buf, size_t *len) {
         }
     }
 }
-
+#pragma mark - 这里对数据缓冲解密
 void decrypt_buf(struct encryption_ctx *ctx, unsigned char *buf, size_t *len) {
     if (ctx->cipher == CIPHER_TABLE) {
         table_decrypt(buf, *len);
