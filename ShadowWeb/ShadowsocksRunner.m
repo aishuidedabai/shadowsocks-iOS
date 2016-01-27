@@ -130,6 +130,7 @@
 
 + (void)saveConfigForKey:(NSString *)key value:(NSString *)value {
     [[NSUserDefaults standardUserDefaults] setObject:value forKey:key];
+    [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 + (NSString *)configForKey:(NSString *)key {
