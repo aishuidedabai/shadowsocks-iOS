@@ -1079,6 +1079,9 @@
 					621571A416CF6BCB003D96B4 = {
 						DevelopmentTeam = 26XB6LEGAP;
 					};
+					627A6DF618B47E9300493BBC = {
+						DevelopmentTeam = 26XB6LEGAP;
+					};
 				};
 			};
 			buildConfigurationList = 621571A016CF6BCA003D96B4 /* Build configuration list for PBXProject "shadowsocks" */;
@@ -1676,7 +1679,8 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CODE_SIGN_IDENTITY = "Developer ID Application";
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1695,7 +1699,13 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				INFOPLIST_FILE = "ShadowsocksX/ShadowsocksX-Info.plist";
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				OTHER_CFLAGS = "-I/usr/local/include";
+				OTHER_LDFLAGS = (
+					"-L/usr/local/lib",
+					"-lsodium",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 				SDKROOT = macosx;
 				WRAPPER_EXTENSION = app;
 			};
@@ -1708,7 +1718,8 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CODE_SIGN_IDENTITY = "Developer ID Application";
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
@@ -1725,7 +1736,13 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				INFOPLIST_FILE = "ShadowsocksX/ShadowsocksX-Info.plist";
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				OTHER_CFLAGS = "-I/usr/local/include";
+				OTHER_LDFLAGS = (
+					"-L/usr/local/lib",
+					"-lsodium",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 				SDKROOT = macosx;
 				WRAPPER_EXTENSION = app;
 			};
